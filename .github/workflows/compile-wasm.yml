@@ -3,8 +3,6 @@ name: Compile WASM Modules
 on:
   push:
     branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master, develop ]
   workflow_dispatch:
 
 jobs:
@@ -12,33 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
+      
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v12
         with:
           version: latest
           actions-cache-folder: 'emsdk-cache'
 
-      - name: Verify Emscripten
-        run: emcc --version
-
-      - name: Install build dependencies
+      - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y build-essential
 
-      - name: Make build script executable
-        run: chmod +x build_all.sh
+      - name: Compile WASM
+        run: |
+          chmod +x build_all.sh
+          ./build_all.sh
 
-      - name: Compile all WASM modules
-        run: ./build_all.sh
-
-      - name: List generated files
-        run: ls -lh dist/
-    
-      - name: Upload dist artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: wasm-modules
           path: dist/
-          retention-days: 30
